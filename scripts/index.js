@@ -10,8 +10,13 @@ module.exports = async function main(callback) {
         const Box = artifacts.require('Box')
         const box = await Box.deployed();
 
+        // const value = await box.retrieve();
+        // console.log('Box value is', value.toString())
+
+        await box.store(23);
         const value = await box.retrieve();
-        console.log('Box value is', value.toString())
+        console.log('Box value is', value.toString());
+
 
         callback(0);
     } catch (error) {
