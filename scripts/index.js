@@ -1,26 +1,28 @@
-// scripts/index.js
-module.exports = async function main(callback) {
-    try {
-        // Our code will go here
+// test/Box.test.js
 
-        // Retrieve accounts from the local node
-        const accounts = await web3.eth.getAccounts();
-        console.log(accounts)
+// Load dependencies
+const { accounts, contract } = require('@openzeppelin/test-environment');
+const { expect } = require('chai');
 
-        const Box = artifacts.require('Box')
-        const box = await Box.deployed();
+// Load compiled artifacts
+const Box = contract.fromArtifact('Box');
 
-        // const value = await box.retrieve();
-        // console.log('Box value is', value.toString())
+// Start test block
+describe('Box', function () {
+  const [ owner ] = accounts;
 
-        await box.store(23);
-        const value = await box.retrieve();
-        console.log('Box value is', value.toString());
+  beforeEach(async function () {
+    // Deploy a new Box contract for each test
+    this.contract = await Box.new({ from: owner });
+  });
 
+  // Test case
+  it('retrieve returns a value previously stored', async function () {
+    // Store a value - recall that only the owner account can do this!
+    await this.contract.store(42, { from: owner });
 
-        callback(0);
-    } catch (error) {
-        console.error(error);
-        callback(1);
-    }
-};
+    // Test if the returned value is the same one
+    // Note that we need to use strings to compare the 256 bit integers
+    expect((await this.contract.retrieve()).toString()).to.equal('42');
+  });
+});
